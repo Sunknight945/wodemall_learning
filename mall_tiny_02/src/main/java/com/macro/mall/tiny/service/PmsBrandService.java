@@ -18,4 +18,6 @@ public interface PmsBrandService {
   List<PmsBrand> listBrand(Integer pageNum, Integer pageSize);
   
   PmsBrand getbrand(Long id);
+  
+  int deleteBrand(Long id);
 }

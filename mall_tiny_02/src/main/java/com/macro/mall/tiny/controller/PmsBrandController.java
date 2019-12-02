@@ -7,6 +7,7 @@ import com.macro.mall.tiny.mbg.model.PmsBrand;
 import com.macro.mall.tiny.service.PmsBrandService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,7 @@ public class PmsBrandController {
   
   @ApiOperation("按品牌Id更新传来的品牌信息")
   @PutMapping("/update/{id}")
-  public CommonResult update(@PathVariable("id") Long branId, @RequestBody PmsBrand pmsBrandDto) {
+  public CommonResult update(@PathVariable("id")@ApiParam("品牌的Id") Long branId, @RequestBody PmsBrand pmsBrandDto) {
     CommonResult commonResult;
     int count = demoService.update(branId, pmsBrandDto);
     if (count == 1) {
@@ -66,7 +67,7 @@ public class PmsBrandController {
   
   @ApiOperation("按id删除单个品牌")
   @DeleteMapping("/delete/{id}")
-  public CommonResult deleteBrand(@PathVariable("id") Long id) {
+  public CommonResult deleteBrand(@PathVariable("id")@ApiParam("品牌的Id") Long id) {
     int i = this.demoService.deleteBrand(id);
     if (i == 1) {
       LOGGER.debug("deleteBrand success : id={}", id);
@@ -81,15 +82,15 @@ public class PmsBrandController {
   @ApiOperation("分页查询品牌列表")
   @GetMapping("/list")
   public CommonResult<CommonPage<PmsBrand>> getListBrandByPage(
-      @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "3") Integer pageSize) {
+      @RequestParam(value = "pageNum", defaultValue = "1") @ApiParam("页码") Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "3") @ApiParam("每页数量") Integer pageSize) {
     List<PmsBrand> brandList = this.demoService.listBrand(pageNum, pageSize);
     return CommonResult.success(CommonPage.rest(brandList));
   }
   
   @ApiOperation("按id获取单个品牌")
   @GetMapping("/{id}")
-  public CommonResult<PmsBrand> brand(@PathVariable("id") Long id) {
+  public CommonResult<PmsBrand> brand(@PathVariable("id")@ApiParam("品牌的Id") Long id) {
     return CommonResult.success(demoService.getbrand(id));
   }
   

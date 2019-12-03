@@ -1,4 +1,5 @@
 package com.macro.mall.tiny.mbg;
+
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.dom.java.Field;
@@ -8,7 +9,6 @@ import org.mybatis.generator.internal.DefaultCommentGenerator;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import java.util.Properties;
 
 

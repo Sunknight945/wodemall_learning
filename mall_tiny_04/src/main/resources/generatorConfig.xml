@@ -55,22 +55,22 @@
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
         </table>
 
-        <!--后台角色表-->
-        <table tableName="ums_admin_permission_relation">
-            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
-        </table>
-
         <!--后台权限表-->
         <table tableName="ums_permission">
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
         </table>
 
-        <!--用户与角色关联表-->
+        <!--后台用户id权限id关系表-->
+        <table tableName="ums_admin_permission_relation">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+        <!--用户与id角色id关系表-->
         <table tableName="ums_admin_role_relation">
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
         </table>
 
-        <!--角色与权限关联表-->
+        <!--角色id与权限id关系表-->
         <table tableName="ums_role_permission_relation">
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
         </table>

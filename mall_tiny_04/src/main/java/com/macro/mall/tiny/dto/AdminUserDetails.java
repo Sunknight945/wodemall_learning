@@ -11,21 +11,25 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * SpringSecurity需要的用户详情
+ *
  * @author ovo
  */
 public class AdminUserDetails implements UserDetails {
-  UmsAdmin umsAdmin;
-  List<UmsPermission> permissionList;
+  private UmsAdmin umsAdmin;
+  private List<UmsPermission> umsPermissions;
   
-  public AdminUserDetails(UmsAdmin umsAdmin, List<UmsPermission> permissionList) {
+  public AdminUserDetails(UmsAdmin umsAdmin, List<UmsPermission> umsPermissions) {
     this.umsAdmin = umsAdmin;
-    this.permissionList = permissionList;
+    this.umsPermissions = umsPermissions;
   }
   
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return this.permissionList.stream().filter(permission -> permission.getValue() != null)
-               .map(permission -> new SimpleGrantedAuthority(permission.getValue()))
+    //返回当前用户的权限
+    return umsPermissions.stream()
+               .filter(umsPermission -> umsPermission.getValue() != null)
+               .map(umsPermission -> new SimpleGrantedAuthority(umsPermission.getValue()))
                .collect(Collectors.toList());
   }
   

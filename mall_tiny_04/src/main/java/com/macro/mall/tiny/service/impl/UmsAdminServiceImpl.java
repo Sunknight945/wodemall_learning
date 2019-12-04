@@ -12,6 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.CollectionUtils;
@@ -86,6 +91,23 @@ public class UmsAdminServiceImpl implements UmsAdminService {
   @Override
   public List<UmsPermission> getPermissionList(Long adminId) {
     return umsAdminRoleRelationDao.getPermissionList(adminId);
+  }
+  
+  @Override
+  public String login(String username, String password) {
+    String token = null;
+    try {
+      UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+      if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+        throw new BadCredentialsException("密码错误");
+      }
+      UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+      SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+      token = jwtTokenUtil.generateToken(userDetails);
+    } catch (AuthenticationException e) {
+      LOGGER.warn("登录异常:{}", token);
+    }
+    return token;
   }
   
   

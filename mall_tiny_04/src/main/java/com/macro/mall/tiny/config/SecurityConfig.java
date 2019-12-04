@@ -8,7 +8,6 @@ import com.macro.mall.tiny.dto.AdminUserDetails;
 import com.macro.mall.tiny.mbg.model.UmsAdmin;
 import com.macro.mall.tiny.mbg.model.UmsPermission;
 import com.macro.mall.tiny.service.UmsAdminService;
-import com.sun.deploy.security.UserDeclinedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -40,59 +40,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private RestfulAccessDeniedHandler restfulAccessDeniedHandler;
   @Autowired
   private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-
-
-//  @Override
-//  protected void configure(HttpSecurity http) throws Exception {
-//    http.csrf()
-//        .disable()
-//        .sessionManagement()  //基于token, 所以不需要session
-//        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//        .and()
-//        .authorizeRequests()
-//        .antMatchers(HttpMethod.GET,
-//            "/",
-//            "/favicon.ico",
-//            "/*.html",
-//            "/**/*.css",
-//            "/**/*.js",
-//            "/swagger-resources/**",
-//            "/v2/api-docs/**"
-//        )
-//        .permitAll()
-//        .antMatchers("/admin/login", "/admin/register") //对登录或者注册允许匿名访问
-//        .permitAll()
-//        .antMatchers(HttpMethod.OPTIONS) //跨域的请求会先进行一次options请求
-//        .permitAll()
-//        .antMatchers("/**") //测试时全部运行访问
-//        .permitAll()
-//        .anyRequest() //除了上面允许的请求路径 请求方法 和资源外, 所有的请求都需要经过鉴权认证
-//        .authenticated();
-//    //禁用缓存
-//    http.headers().cacheControl(); //禁用缓存
-//    // 添加jwt filter
-//    http.addFilterBefore(jwtAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-//    //添加自定义未授权和未登录结果返回
-//    http.exceptionHandling()
-//        .accessDeniedHandler(restfulAccessDeniedHandler)
-//        .authenticationEntryPoint(restAuthenticationEntryPoint);
-//  }
   
   
   /**
-   * http.authorizeRequests().anyRequest().authenticated().and().formLogin().and().httpBasic();
+   * 用于配置需要拦截的url路径、jwt过滤器及出异常后的处理器；
+   *
+   * @param http
+   * @throws Exception
    */
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.csrf()
         .disable()
-        .sessionManagement()
+        .sessionManagement()  //基于token, 所以不需要session
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeRequests()
         .antMatchers(HttpMethod.GET,
             "/",
-            "/fa",
             "/favicon.ico",
             "/*.html",
             "/**/*.css",
@@ -101,22 +66,35 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/v2/api-docs/**"
         )
         .permitAll()
-        .antMatchers("/admin/login", "/admin/register")
+        .antMatchers("/admin/login", "/admin/register") //对登录或者注册允许匿名访问
         .permitAll()
-        .antMatchers(HttpMethod.OPTIONS)
+        .antMatchers(HttpMethod.OPTIONS) //跨域的请求会先进行一次options请求
         .permitAll()
-        .antMatchers("/**")
+        .antMatchers("/**") //测试时全部运行访问
         .permitAll()
-        .anyRequest()
+        .anyRequest() //除了上面允许的请求路径 请求方法 和资源外, 所有的请求都需要经过鉴权认证
         .authenticated();
-    http.headers().cacheControl();
+    //禁用缓存
+    http.headers().cacheControl(); //禁用缓存
+    // 添加jwt filter
     http.addFilterBefore(jwtAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-    
+    //添加自定义未授权和未登录结果返回
+    http.exceptionHandling()
+        //当用户没有访问权限时的处理器，用于返回JSON格式的处理结果；
+        .accessDeniedHandler(restfulAccessDeniedHandler)
+        //当未登录或token失效时，返回JSON格式的结果；
+        .authenticationEntryPoint(restAuthenticationEntryPoint);
   }
   
+  
+  /**
+   * configure(AuthenticationManagerBuilder auth)
+   * 定义的核心接口，用于根据用户名获取用户信息，需要自行实现
+   */
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
     auth.userDetailsService(userDetailsService())
+        //用于配置UserDetailsService及PasswordEncoder；
         .passwordEncoder(passwordEncoder());
   }
   
@@ -131,33 +109,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     return new BCryptPasswordEncoder();
   }
   
- /* @Bean
-  public UserDetailsService userDetailsService() {
-    //获取用户登录信息
-    return username -> {
-      UmsAdmin admin = adminService.getAdminByUsername(username);
-      if (admin != null) {
-        List<UmsPermission> permissionList = adminService.getPermissionList(admin.getId());
-        return new AdminUserDetails(admin, permissionList);
-      }
-      throw new UsernameNotFoundException("用户名和密码错误");
-    };
-  }*/
-  
   @Bean
   public UserDetailsService userDetailsService() {
     //获取用户登录信息
     return username -> {
-      UmsAdmin umsAdmin = adminService.getAdminByUsername(username);
-      if (umsAdmin != null) {
-        List<UmsPermission> permissionList = adminService.getPermissionList(umsAdmin.getId());
-        return new AdminUserDetails(umsAdmin, permissionList);
+      UmsAdmin adminByUsername = this.adminService.getAdminByUsername(username);
+      if (adminByUsername != null) {
+        List<UmsPermission> permissionList = this.adminService.getPermissionList(adminByUsername.getId());
+        return new AdminUserDetails(adminByUsername, permissionList);
       }
-      throw new UserDeclinedException("用户名和密码错误");
+      throw new UsernameNotFoundException("用户名或密码错误");
     };
   }
   
-  
+  /**
+   * JwtAuthenticationTokenFilter
+   * 在用户名和密码校验前添加的过滤器，如果有jwt的token，会自行根据token信息进行登录。
+   */
   @Bean
   public JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter() {
     return new JwtAuthenticationTokenFilter();

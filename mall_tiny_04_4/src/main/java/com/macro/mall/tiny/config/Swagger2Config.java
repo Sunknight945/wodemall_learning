@@ -1,5 +1,6 @@
 package com.macro.mall.tiny.config;
 
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -18,35 +19,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Swagger2API文档的配置
+ * 已经是 spring的组建了, 所以接下来可以配置swagger的bean实例docket
+ * 通过修改配置实现调用接口自带Authorization头，这样就可以访问需要登录的接口了。
+ *
+ * @author ovo
  */
 @Configuration
 @EnableSwagger2
 public class Swagger2Config {
+  
+  /**
+   * swagger的bean实例docket.
+   */
   @Bean
-  public Docket createRestApi(){
+  public Docket RestDocketApi() {
     return new Docket(DocumentationType.SWAGGER_2)
                .apiInfo(apiInfo())
                .select()
-               //为当前包下controller生成API文档
+               //RequestHandlerSelectors,配置要描接口的方式
+               //basePackage:指定要扫描的包
                .apis(RequestHandlerSelectors.basePackage("com.macro.mall.tiny.controller"))
+               //过滤什么路径
                .paths(PathSelectors.any())
-               .build()
+               .build()  //build 一般是工厂模式
                //添加登录认证
-               .securitySchemes(securitySchemes())
-               .securityContexts(securityContexts());
+               .securitySchemes(securityScheme())
+               .securityContexts(securityContext());
   }
+  
   
   private ApiInfo apiInfo() {
     return new ApiInfoBuilder()
-               .title("SwaggerUI演示")
-               .description("mall-tiny")
-               .contact("macro/uiys")
+               .title("SwaggerUi前后分离接口")
+               .description("mall-tiny 购物的接口")
+               //.termsOfServiceUrl("") //服务条款网址
+               .contact("macro / uiys")
                .version("1.0")
                .build();
   }
   
-  private List<ApiKey> securitySchemes() {
+  //通过修改配置实现调用接口自带 Authorization 头，这样就可以访问需要登录的接口了。
+  //修改 默认的 .securitySchemes(安全策略) 来实现启用
+  //swagger的时候可以让其自带Authorization(授权书)头这样就可以测试admin->role->permission
+  //之间的获取权限的了相关内容了.
+  //效果：配置完之后点击右上角的Authorize，弹出认证窗口之后输入请求token，这样之后的每次请求的请求头都会带有token认证信息
+  private List<ApiKey> securityScheme() {
     //设置请求头信息
     List<ApiKey> result = new ArrayList<>();
     ApiKey apiKey = new ApiKey("Authorization", "Authorization", "header");
@@ -54,14 +71,15 @@ public class Swagger2Config {
     return result;
   }
   
-  private List<SecurityContext> securityContexts() {
+  
+  private List<SecurityContext> securityContext() {
     //设置需要登录认证的路径
     List<SecurityContext> result = new ArrayList<>();
     result.add(getContextByPath("/brand/.*"));
     return result;
   }
   
-  private SecurityContext getContextByPath(String pathRegex){
+  private SecurityContext getContextByPath(String pathRegex) {
     return SecurityContext.builder()
                .securityReferences(defaultAuth())
                .forPaths(PathSelectors.regex(pathRegex))

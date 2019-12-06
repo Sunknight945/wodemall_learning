@@ -17,10 +17,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderTimeoutCancelTask {
   
-  public static final Logger LOGGER = LoggerFactory.getLogger(OrderTimeoutCancelTask.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(OrderTimeoutCancelTask.class);
   
+  
+  /**
+   * Todo: 2019/5/3 此处应调用取消订单的方法，具体查看mall项目源码
+   * 里面暂时没有实现方法.
+   */
   public void cancelTimeOutOrder() {
-    //Todo: 2019/5/3 此处应调用取消订单的方法，具体查看mall项目源码
     LOGGER.info("取消订单,并且根据sku编号释放锁定库存");
   }
 }

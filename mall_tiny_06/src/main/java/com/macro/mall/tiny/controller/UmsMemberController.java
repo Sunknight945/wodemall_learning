@@ -2,13 +2,14 @@ package com.macro.mall.tiny.controller;
 
 import com.macro.mall.tiny.common.api.CommonResult;
 import com.macro.mall.tiny.service.UmsMemberService;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * @author ovo
  */
-//@Api(tags = "UmsMemberController", description = "会员登录注册管理")
+@Api(tags = "UmsMemberController", description = "会员登录注册管理")
 @RestController
 @RequestMapping("/sso")
 public class UmsMemberController {

@@ -43,8 +43,8 @@ public class Swagger2Config {
                .paths(PathSelectors.any())
                .build()  //build 一般是工厂模式
                //添加登录认证
-               .securitySchemes(securityScheme())
-               .securityContexts(securityContext());
+               .securitySchemes(securitySchemes())
+               .securityContexts(securityContexts());
   }
   
   
@@ -53,7 +53,7 @@ public class Swagger2Config {
                .title("SwaggerUi前后分离接口")
                .description("mall-tiny 购物的接口")
                //.termsOfServiceUrl("") //服务条款网址
-               .contact("macro / uiys")
+               .contact("uiys/")
                .version("1.0")
                .build();
   }
@@ -63,7 +63,7 @@ public class Swagger2Config {
   //swagger的时候可以让其自带Authorization(授权书)头这样就可以测试admin->role->permission
   //之间的获取权限的了相关内容了.
   //效果：配置完之后点击右上角的Authorize，弹出认证窗口之后输入请求token，这样之后的每次请求的请求头都会带有token认证信息
-  private List<ApiKey> securityScheme() {
+  private List<ApiKey> securitySchemes() {
     //设置请求头信息
     List<ApiKey> result = new ArrayList<>();
     ApiKey apiKey = new ApiKey("Authorization", "Authorization", "header");
@@ -72,14 +72,14 @@ public class Swagger2Config {
   }
   
   
-  private List<SecurityContext> securityContext() {
+  private List<SecurityContext> securityContexts() {
     //设置需要登录认证的路径
     List<SecurityContext> result = new ArrayList<>();
     result.add(getContextByPath("/brand/.*"));
     return result;
   }
   
-  private SecurityContext getContextByPath(String pathRegex) {
+  private SecurityContext getContextByPath(String pathRegex){
     return SecurityContext.builder()
                .securityReferences(defaultAuth())
                .forPaths(PathSelectors.regex(pathRegex))

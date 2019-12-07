@@ -126,7 +126,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       UmsAdmin admin = adminService.getAdminByUsername(username);
       if (admin != null) {
         List<UmsPermission> permissionList = adminService.getPermissionList(admin.getId());
-        return new AdminUserDetails(admin, permissionList);
+        return new AdminUserDetails(admin,permissionList);
       }
       throw new UsernameNotFoundException("用户名或密码错误");
     };
@@ -139,7 +139,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
    * @return
    */
   @Bean
-  public JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter() {
+  public JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter(){
     return new JwtAuthenticationTokenFilter();
   }
   

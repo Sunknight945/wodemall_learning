@@ -1,6 +1,7 @@
 package com.macro.mall.tiny.common.api;
 
 import com.github.pagehelper.PageInfo;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -25,7 +26,14 @@ public class CommonPage<T> {
     return result;
   }*/
   
-  public static <T> CommonPage<T> rest(List<T> list) {
+  /**
+   * 将PageHelper分页后的list转化为分页信息
+   *
+   * @param list
+   * @param <T>
+   * @return
+   */
+  public static <T> CommonPage<T> restPage(List<T> list) {
     CommonPage<T> result = new CommonPage<T>();
     PageInfo<T> pageInfo = new PageInfo<T>(list);
     result.setTotalPage(pageInfo.getPages());
@@ -33,6 +41,25 @@ public class CommonPage<T> {
     result.setTotal(pageInfo.getTotal());
     result.setList(pageInfo.getList());
     result.setPageNun(pageInfo.getPageNum());
+    return result;
+  }
+  
+  /**
+   * A page is a sublist of a list of objects. It allows gain information about the position of it in the containing entire list.
+   * (这一页是对象列表的子列表。它可以获取整个列表中有关它在容器中的位置的信息(分页内容)。)
+   * 将SpringData分页后的list转化为分页信息
+   *
+   * @param pageInfo
+   * @param <T>
+   * @return
+   */
+  public static <T> CommonPage<T> restPage(Page<T> pageInfo) {
+    CommonPage<T> result = new CommonPage<T>();
+    result.setTotalPage(pageInfo.getTotalPages());
+    result.setPageNun(pageInfo.getNumber());
+    result.setPageSize(pageInfo.getSize());
+    result.setTotal(pageInfo.getTotalElements());
+    result.setList(pageInfo.getContent());
     return result;
   }
   
